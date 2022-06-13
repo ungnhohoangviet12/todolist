@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 export default class ButtonSpecial extends Component {
     constructor(props) {
         super(props)
@@ -18,7 +18,7 @@ export default class ButtonSpecial extends Component {
         }
 
         if (remove) {
-            return <button className='btn btn--remove' onClick={onClick}>X</button>
+            return <button className='btn btn--remove' onClick={onClick}><FontAwesomeIcon icon="fa-solid fa-trash-can-slash" /></button>
         }
 
         return null
