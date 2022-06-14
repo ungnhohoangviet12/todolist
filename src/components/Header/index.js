@@ -8,11 +8,8 @@ export default class Header extends Component {
 
     render() {
         return (
-            <div>
-                <h1>coooo</h1>
-                <h2 style={{ textAlign: 'center' }}>{this.props.title}</h2>
+            <h2 style={{ textAlign: 'center' }}>{this.props.title}</h2>
 
-            </div>
         )
     }
 }
