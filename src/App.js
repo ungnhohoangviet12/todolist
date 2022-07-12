@@ -6,7 +6,7 @@ import Divider from './components/Divider';
 import List from './components/List';
 import Panigation from './components/Panigation';
 import { defaultValueTask, initialTasks, LIMIT_TASK_IN_PAGE } from './constants/common';
-
+import { createNewTask, deleteTaksById, getAllTasks, getTaskById, updateTaskById } from './api/tasksAPI'
 
 import React, { Component } from 'react'
 
@@ -26,13 +26,41 @@ export default class App extends Component {
     this.handleSetCurrentPage = this.handleSetCurrentPage.bind(this)
   }
 
+
+
+
+  componentDidMount() {
+    this.handleGetAll()
+  }
+
+
+  handleGetAll = async () => {
+    try {
+      const data = await getAllTasks()
+      console.log(data);
+      data && this.setState({ listTasks: data })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  handleDeleteTask = async (id) => {
+    try {
+      await deleteTaksById(id)
+      await this.handleGetAll()
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   handleChangeInputTask(e) {
     this.setState({
       inputTaskType: e.target.value
     })
   }
 
-  handleAddTask() {
+
+  handleAddTask = async () => {
     if (!this.state.inputTaskType.trim()) {
       this.setState({
         inputTaskType: ''
@@ -46,40 +74,82 @@ export default class App extends Component {
       taskName: this.state.inputTaskType,
     }
 
-    this.setState(prevState => {
-      return {
-        ...prevState,
-        listTasks: [newTask, ...prevState.listTasks],
+    try {
+      await createNewTask(newTask)
+      await this.handleGetAll()
+    } catch (error) {
+      console.log(error);
+    } finally {
+      this.setState({
         inputTaskType: ''
-      }
-    })
-  }
-
-  handleDeleteTask(id) {
-    const listTasks = [...this.state.listTasks];
-    const indexDelete = listTasks.findIndex(task => task.id === id)
-    if (indexDelete !== -1) {
-      listTasks.splice(indexDelete, 1)
-      this.setState({
-        listTasks: [...listTasks]
       })
     }
   }
 
-  handleCompleteTask(id) {
-    const listTasks = [...this.state.listTasks];
-    const indexUpdate = listTasks.findIndex(task => task.id === id)
-    if (indexUpdate !== -1) {
-      const taskReplace = {
-        ...listTasks[indexUpdate],
-        isCompleted: true
-      }
-      listTasks.splice(indexUpdate, 1, taskReplace)
-      this.setState({
-        listTasks: listTasks
-      })
+  //resful api bat dong bo, status
+
+  //update
+
+  handleCompleteTask = async (id) => {
+    try {
+      const taskById = await getTaskById(id)
+      await updateTaskById(id, { ...taskById, isCompleted: true })
+      await this.handleGetAll()
+    } catch (error) {
+      console.log(error);
     }
   }
+
+  // handleAddTask() {
+  //   if (!this.state.inputTaskType.trim()) {
+  //     this.setState({
+  //       inputTaskType: ''
+  //     })
+  //     return
+  //   }
+
+  //   const newTask = {
+  //     ...defaultValueTask,
+  //     id: new Date().getTime(),
+  //     taskName: this.state.inputTaskType,
+  //   }
+
+  //   this.setState(prevState => {
+  //     return {
+  //       ...prevState,
+  //       listTasks: [newTask, ...prevState.listTasks],
+  //       inputTaskType: ''
+  //     }
+  //   })
+  // }
+
+
+  // handleDeleteTask(id) {
+  //   console.log('delete in tasks', id);
+  //   const listTasks = [...this.state.listTasks];
+  //   const indexDelete = listTasks.findIndex(task => task.id === id)
+  //   if (indexDelete !== -1) {
+  //     listTasks.splice(indexDelete, 1)
+  //     this.setState({
+  //       listTasks: [...listTasks]
+  //     })
+  //   }
+  // }
+
+  // handleCompleteTask(id) {
+  //   const listTasks = [...this.state.listTasks];
+  //   const indexUpdate = listTasks.findIndex(task => task.id === id)
+  //   if (indexUpdate !== -1) {
+  //     const taskReplace = {
+  //       ...listTasks[indexUpdate],
+  //       isCompleted: true
+  //     }
+  //     listTasks.splice(indexUpdate, 1, taskReplace)
+  //     this.setState({
+  //       listTasks: listTasks
+  //     })
+  //   }
+  // }
 
   getTaskInCurrentPage() {
     const startIndex = this.state.currentPage * LIMIT_TASK_IN_PAGE - LIMIT_TASK_IN_PAGE
@@ -93,6 +163,7 @@ export default class App extends Component {
   }
 
   render() {
+    console.log('đây là đường dẫn', process.env.REACT_APP_BE_URL);
     return (
       <div className="App">
         <Header title={'TO DO LIST APPLICATION'} />
